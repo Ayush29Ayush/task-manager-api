@@ -36,7 +36,7 @@ test('Should convert 0 C to 32 F',()=>{
 //     }, 2000);
 // })
 
-//! Method 1
+//! Method 01
 test('Should add two numbers',(done)=>{
     add(2,3).then((sum)=>{
         expect(sum).toBe(5)
@@ -44,7 +44,7 @@ test('Should add two numbers',(done)=>{
     })
 })
 
-//! Method 2
+//! Method 02
 test('Should add two numbers async/await',async()=>{
     const sum = await add(10,22)
     expect(sum).toBe(32)
