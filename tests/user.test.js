@@ -1,31 +1,11 @@
 const request = require('supertest')
-const jwt = require('jsonwebtoken')
-const mongoose = require('mongoose')
+
 const app = require('../src/app')
 const User = require('../src/models/user')
 
-const userOneId = new mongoose.Types.ObjectId
-//! Default User
-const userOne = {
-    _id: userOneId,
-    name: 'Mike',
-    email: 'mike@example.com',
-    password: '56what!!',
-    tokens: [{
-        token: jwt.sign({ _id: userOneId }, process.env.JWT_SECRET)
-    }]
-}
+const { userOneId, userOne , setupDatabase } = require('./fixtures/db')
 
-beforeEach(async()=>{
-    // console.log('beforeEach')
-    await User.deleteMany()
-    await new User(userOne).save()
-
-})
-
-// afterEach(()=>{
-//     console.log('afterEach')
-// })
+beforeEach(setupDatabase)
 
 test('Should signup a new user',async()=>{
     const response = await request(app).post('/users').send({
@@ -115,14 +95,6 @@ test('Should upload avatar image', async()=>{
 
 })
 
-//! Goal: Test user updates
-
-//1. Create "Should update valid user fields"
-//   - Update the name of the test user
-//   - Check the data t confirm it's changed
-//2. Create "Should not update invalid user fields"
-//   - Update a "location" filed and expect error status code
-//3. Test your code
 
 test('Should update valid user fields', async()=>{
     await request(app)
