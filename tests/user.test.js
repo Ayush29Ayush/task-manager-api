@@ -28,18 +28,41 @@ beforeEach(async()=>{
 // })
 
 test('Should signup a new user',async()=>{
-    await request(app).post('/users').send({
+    const response = await request(app).post('/users').send({
         name: 'Ayush',
         email: 'ayushsenapati123@gmail.com',
         password: 'Trialsecret!'
     }).expect(201)
+
+    //! Assert that the database was changed correctly
+    const user = await User.findById(response.body.user._id)
+    expect(user).not.toBeNull()
+
+    //! Assertions about the response
+    // expect(response.body.user.name).toBe('Ayush')
+    // The better way is written below
+    expect(response.body).toMatchObject({
+        user:{
+            name: 'Ayush',
+            email: 'ayushsenapati123@gmail.com'    
+        },
+        token: user.tokens[0].token
+    })
+    expect(user.password).not.toBe('Trialsecret')
 })
 
+//! Goal: Validate new token is saved
+//1. Fetch the user from the database
+//2. Assert that token in response matches users second token
+//3. Test your work
+
 test('Should login existing user',async()=>{
-    await request(app).post('/users/login').send({
+    const response = await request(app).post('/users/login').send({
         email: userOne.email,
         password: userOne.password
     }).expect(200)
+    const user = await User.findById(userOneId)
+    expect(response.body.token).toBe(user.tokens[1].token)
 })
 
 test('Should not login non-existent user',async()=>{
@@ -65,12 +88,10 @@ test('Should not get profile for unauthenticated user', async()=>{
 
 })
 
-//! Goal: Test delete account
-//1. Create "Should delete account for user"
-//   - Setup auth header and expect correct status code
-//2. Create "Should not delete account for unauthenticated user"
-//   - Expect correct status code
-//3. test your work
+//! Goal: Validate user is removed
+//1. Fetch the user from the database
+//2. Assert null response (use assertion from signup test
+//3. Test your work
 
 test('Should delete account for user', async()=>{
     await request(app)
@@ -78,6 +99,8 @@ test('Should delete account for user', async()=>{
         .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
         .send()
         .expect(200)
+    const user = await User.findById(userOneId)
+    expect(user).toBeNull()
 })
 
 test('Should not delete account for unauthenticated user',async()=>{
